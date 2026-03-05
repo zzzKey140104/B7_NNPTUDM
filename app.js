@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+let mongoose = require('mongoose')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -24,6 +25,14 @@ app.use('/users', usersRouter);
 app.use('/api/v1/products', require('./routes/products'))
 app.use('/api/v1/categories', require('./routes/categories'))
 
+
+mongoose.connect('mongodb://localhost:27017/NNPTUD-C5');
+mongoose.connection.on('connected', function () {
+  console.log("connected");
+})
+mongoose.connection.on('disconnecting', function () {
+  console.log("disconnected");
+})
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
