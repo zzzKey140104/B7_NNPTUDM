@@ -3,7 +3,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-let mongoose = require('mongoose')
+let mongoose = require('mongoose');
+
+// Load environment variables from .env (optional)
+require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -26,13 +29,23 @@ app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/products', require('./routes/products'))
 app.use('/api/v1/categories', require('./routes/categories'))
 app.use('/api/v1/roles', require('./routes/roles'))
-mongoose.connect('mongodb://localhost:27017/NNPTUD-C5');
-mongoose.connection.on('connected', function () {
-  console.log("connected");
-})
-mongoose.connection.on('disconnecting', function () {
-  console.log("disconnected");
-})
+
+// MongoDB connection
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/NNPTUD-C5';
+
+mongoose.connect(mongoUri)
+  .then(() => console.log('MongoDB connected:', mongoUri))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+mongoose.connection.on('disconnected', function () {
+  console.log('MongoDB disconnected');
+});
+
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed due to application termination');
+  process.exit(0);
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

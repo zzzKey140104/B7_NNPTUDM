@@ -35,4 +35,19 @@ let productSchema = mongoose.Schema({
         default: false
     }
 })
+// Sau khi một product mới được lưu thành công, tự động tạo inventory
+productSchema.post('save', async function(doc, next) {
+    try {
+        const Inventory = mongoose.model('inventory');
+        await Inventory.create({
+            product: doc._id,
+            stock: 0,
+            reserved: 0,
+            soldCount: 0
+        });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 module.exports = new mongoose.model('product', productSchema)
